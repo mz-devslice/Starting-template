@@ -6,8 +6,8 @@ starting template for the development of the site using gulp 4
 при запуске команд:
 
 для development
-gulp картинки не оптимизируются 
+gulp 
 gulp svg создает спрайт svg
 
 для production
-gulp build оптимизируются картинки 
+gulp build оптимизирует картинки 
