@@ -1,0 +1,78 @@
+//gulp4v1 целый 
+
+'use strict';
+
+let gulp = require('gulp'),
+		gp = require('gulp-load-plugins')(),
+		argv = require('yargs').argv,
+		// cleanCSS = require('gulp-clean-css');
+		browserSync = require('browser-sync').create();
+global.$ = {
+	gulp: require('gulp'),
+	gp: require('gulp-load-plugins')(),
+	argv: require('yargs').argv,
+		// cleanCSS = require('gulp-clean-css');
+	bs: require('browser-sync').create()
+};
+		
+gulp.task('serve', function() {
+	browserSync.init({
+		server: {
+			baseDir: "./build"
+			}
+		});
+
+});
+	
+
+gulp.task('html',function() {
+	return gulp.src('src/*.html')
+	.pipe(gulp.dest('build'))
+	.on('end', browserSync.reload);
+	});
+//при использовании препроцесора pug для html добавить в src папку pug, а в ней папкуи pages и layout вместо index.html
+// gulp.task('pug',function() { 
+// 	return gulp.src('src/pug/pages/*.pug')
+// 	.pipe(gp.pug({
+// 		pretty:true
+// 	}))
+// 	.pipe(gulp.dest('build'))
+// 	.on('end', browserSync.reload);
+// 	});
+	
+
+gulp.task('styles', function(){
+	return gulp.src('src/static/sass/*.sass')
+	.pipe(gp.plumber({
+		errorHandler: gp.notify.onError(function(err){
+			return {
+				title: 'styles',
+				message: err.message
+			};
+		})
+	}))
+	.pipe(gp.sourcemaps.init())
+	.pipe(gp.sass())
+	
+	.pipe(gp.autoprefixer({
+		browsers: ['last 10 versions'],
+		cascade: true
+	}))
+	
+	 .pipe(gp.if(argv.prod, gp.csso()))
+	.pipe(gp.sourcemaps.write())
+	.pipe(gulp.dest('build/css'))
+	.pipe(browserSync.reload({
+		stream: true		
+	}));
+	
+});	
+
+gulp.task('watch', function (){
+	gulp.watch('src/**/*.html', gulp.series('html') );
+	gulp.watch('src/static/sass/**/*.sass', gulp.series('styles') );
+});
+gulp.task('default', gulp.series(
+	gulp.parallel('html', 'styles'),
+	gulp.parallel('watch', 'serve')
+));
